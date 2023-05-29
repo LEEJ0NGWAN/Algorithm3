@@ -1,15 +1,12 @@
-import java.util.Arrays;
-
-public class 스킬트리 {
+class Solution {
 
     public long solution(String skill, String[] skill_trees) {
 
-        final String antiRegex = String.join(skill, "[^", "]*");
-
-        return Arrays
+        final String pattern = String.join(skill, "[^", "]");
+        return java.util.Arrays
             .stream(skill_trees)
-            .map(tree -> tree.replaceAll(antiRegex, ""))
-            .filter(tree -> skill.substring(0, tree.length()).equals(tree))
+            .map(skill_tree -> skill_tree.replaceAll(pattern, ""))
+            .filter(skill::startsWith)
             .count();
     }
 }
