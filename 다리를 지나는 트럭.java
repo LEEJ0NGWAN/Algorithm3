@@ -2,25 +2,22 @@ class Solution {
 
     public int solution(int bridge_length, int weight, int[] trucks) {
 
-        int answer=0, index=0;
-        boolean trucksOnBridge=false;
+        int answer = 1;
 
-        final int[] bridge = new int[bridge_length];
-        while (index<trucks.length||trucksOnBridge) {
+        final java.util.Deque<int[]> deque = new java.util.ArrayDeque<>();
+        for (int truck: trucks) {
 
-            trucksOnBridge = false;
-            for (int i=(weight+=bridge[0])*0+1; i<bridge_length; trucksOnBridge|=(bridge[i-1]=bridge[i++])!=0);
+            while (!deque.isEmpty()&&(deque.peek()[0]+bridge_length<=answer))
+                weight+=deque.poll()[1];
+            while (truck>weight) {
 
-            bridge[bridge_length-1]=0;
-            if (index<trucks.length&&trucks[index]<=weight) {
-
-                trucksOnBridge = true;
-                weight -= (bridge[bridge_length-1]=trucks[index++]);
+                final int[] info = deque.poll();
+                answer = info[0]+bridge_length;
+                weight+= info[1];
             }
-            
-
-            answer++;
+            deque.offer(new int[]{answer++, truck});
+            weight-=truck;
         }
-        return answer;
+        return deque.peekLast()[0]+bridge_length;
     }
 }
