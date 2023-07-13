@@ -1,72 +1,61 @@
-import java.util.Set;
 import java.util.Map;
 import java.util.List;
 
 class Solution {
 
-    private static final int MAX_SIZE = 20;
-    private void dfs (
-        StringBuilder course,
-        Map<Character, Set<Integer>> menus, Map<Integer, Set<String>> newCourses,
-        int[] maxCountPerCourseSize) {
+    public void dfs(char[] order, StringBuilder courseBuilder, int courseSize, int menuIndex, Map<String, Integer> courses) {
 
-        if (newCourses.containsKey(course.length())) {
+        if (courseBuilder.length()==courseSize) {
 
-            final Set<Integer> ordered = new java.util.HashSet<>(menus.get(course.charAt(0)));
+            final String course = courseBuilder.toString();
+            courses.put(course, courses.getOrDefault(course, 0)+1);
 
-            for (int i=1, l=course.length(); i<l; i++)
-            ordered.retainAll(menus.get(course.charAt(i)));
-
-            if (ordered.size()>=2) {
-
-                if (maxCountPerCourseSize[course.length()]==ordered.size())
-                newCourses.get(course.length()).add(course.toString());
-                else
-                if (maxCountPerCourseSize[course.length()]<ordered.size()) {
-
-                    maxCountPerCourseSize[course.length()] = ordered.size();
-                    newCourses.get(course.length()).clear();
-                    newCourses.get(course.length()).add(course.toString());
-                }
-                
-            }
+            if (courses.get(null)<courses.get(course))
+                courses.put(null, courses.get(course));
         }
+        else for (int i=menuIndex+1; i<order.length; i++) {
 
-        final char startChar = course.length()==0? 'A': (char)(course.charAt(course.length()-1)+1);
-
-        for (char c=startChar; c<='Z'; c++)
-        if (menus.containsKey(c)) {
-
-            course.append(c);
-            dfs(course, menus, newCourses, maxCountPerCourseSize);
-            course.deleteCharAt(course.length()-1);
+            courseBuilder.append(order[i]);
+            dfs(order,courseBuilder,courseSize,i,courses);
+            courseBuilder.deleteCharAt(courseBuilder.length()-1);
         }
     }
 
     public String[] solution(String[] orders, int[] course) {
 
-        final int[] maxCountPerCourseSize = new int[MAX_SIZE+1];
-        final Map<Integer, Set<String>> newCourses = new java.util.HashMap<>();
+        final List<String> answer = new java.util.ArrayList<>();
+        final Map<String, Integer> courses = new java.util.HashMap<>();
 
-        for (int c: course)
-        newCourses.put(c, new java.util.HashSet<>());
+        final char[][] orderArray = java.util.Arrays
+            .stream(orders)
+            .map(String::toCharArray)
+            .toArray(char[][]::new);
+        for (char[] order: orderArray)
+        java.util.Arrays.sort(order);
 
-        final Map<Character, Set<Integer>> menus = new java.util.HashMap<>();
-        for (int i=0; i<orders.length; i++)
-        for (char c: orders[i].toCharArray()) {
+        for (int courseSize: course) {
 
-            if (!menus.containsKey(c))
-            menus.put(c, new java.util.HashSet<>());
-            menus.get(c).add(i);
+            courses.clear();
+            courses.put(null, 2);
+
+            for (char[] order: orderArray)
+            if (order.length>=courseSize) {
+
+                dfs(order, new StringBuilder(), courseSize, -1, courses);
+            }
+
+            final int mostOrderedCount = courses.remove(null);
+
+            courses
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue()==mostOrderedCount)
+                .forEach(e -> answer.add(e.getKey()));
         }
 
-        dfs(new StringBuilder(), menus, newCourses, maxCountPerCourseSize);
-
-        return newCourses
-            .values()
+        return answer
             .stream()
-            .flatMap(value -> value.stream())
-            .sorted((a,b)-> a.compareTo(b))
+            .sorted()
             .toArray(String[]::new);
     }
 }
