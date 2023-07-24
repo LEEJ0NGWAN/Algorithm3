@@ -1,6 +1,6 @@
 class Solution {
 
-    public long solution(int N, int[][] road, int K) {
+    public long solution1(int N, int[][] road, int K) {
 
         final int[][] map = new int[N+1][N+1];
         for (int[] r: road)
@@ -25,6 +25,29 @@ class Solution {
         return java.util.stream.IntStream
             .range(1,N+1)
             .filter(x -> distance[x]<=K)
+            .count();
+    }
+
+    public long solution2(int N, int[][] road, int K) {
+
+        final int[][] distance = new int[N+1][N+1];
+
+        for (int i=1; i<=N; i++)
+        for (int j=1; j<=N; j++)
+        if (i!=j)
+        distance[i][j] = distance[j][i] = 20000001;
+
+        for (int[] r: road)
+        distance[r[0]][r[1]] = distance[r[1]][r[0]] = Math.min(distance[r[0]][r[1]], r[2]);
+
+        for (int i=1; i<=N; i++)
+        for (int j=1; j<=N; j++)
+        for (int k=1; k<=N; k++)
+        distance[j][k] = Math.min(distance[j][k], distance[j][i]+distance[i][k]);
+
+        return java.util.stream.IntStream
+            .range(1,N+1)
+            .filter(x -> distance[1][x]<=K)
             .count();
     }
 }
